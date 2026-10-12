@@ -1,105 +1,154 @@
-<p align="center"> 
+<p align="center">
+
 <!-- (site para ícones: https://shields.io/ ) -->
- 
+
 <img alt="Maintained" src="https://img.shields.io/badge/Maintained%3F-Yes-green">
+
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/arikcnovais/linuxmint-post-install">
+
 <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/arikcnovais/linuxmint-post-install">
+
 <img alt="GitHub commit activity (branch)" src="https://img.shields.io/github/commit-activity/y/arikcnovais/linuxmint-post-install">
 
 </p>
+
 </br>
 
-# 🍃 Roteiro de Pós-Instalação - Linux Mint 22.3 (Base Ubuntu)
+# 🍃 Pós-Instalação — Linux Mint 22.3 (Zena / base Ubuntu)
 
-Este repositório contém um guia prático, direto e organizado para a pós-instalação do **Linux Mint 22.3 (Zena / Base Ubuntu)**. O objetivo é transformar o sistema recém-instalado em um ambiente completo para produtividade, criação de conteúdo, comunicação e jogos, priorizando pacotes Flatpak mantidos e seguros do Flathub.
+Roteiro de pós-instalação **automatizado e enxuto** para o Linux Mint 22.3.
+As tarefas estão divididas em **categorias independentes**: você executa só o
+que quer, na ordem que quiser — ou tudo de uma vez.
 
----
-
-## 📋 Sumário
-1. [Atualização do Sistema e Codecs](#1-atualização-do-sistema-e-codecs)
-2. [Configuração do Firewall e Segurança](#2-configuração-do-firewall-e-segurança)
-3. [Configuração do Flathub](#3-configuração-do-flathub)
-4. [Instalação de Aplicativos Flatpak (por Categoria)](#4-instalação-de-aplicativos-flatpak-por-categoria)
-   - [Navegadores Web](#navegadores-web)
-   - [Comunicação e Produtividade](#comunicação-e-produtividade)
-   - [Criação e Edição Gráfica/Vídeo](#criação-e-edição-gráficavídeo)
-   - [Mídia e Entretenimento](#mídia-e-entretenimento)
-   - [Jogos e Emulação](#jogos-e-emulação)
-   - [Gerenciamento e Utilitários](#gerenciamento-e-utilitários)
-5. [Instalação de Aplicativos e Pacotes via APT](#5-instalação-de-aplicativos-e-pacotes-via-apt)
-6. [Otimização e Ajustes Finos](#6-otimização-e-ajustes-finos)
-7. [Considerações Finais](#7-considerações-finais)
+- **Só o essencial:** nada de duplicar o que o Mint já traz.
+- **Sem apps proprietários:** sem navegadores extras, sem clientes de serviços fechados.
+- **Gaming livre:** Prism Launcher, RetroArch e gamemode.
+- **Automatizado:** cada categoria é um script idempotente (pode rodar várias vezes sem estragar nada).
+- **Seu controle:** menu interativo ou chamada direta por categoria.
 
 ---
 
-## 1. Atualização do Sistema e Codecs
+## 🚀 Uso rápido
 
-Antes de qualquer coisa, atualize as listas de pacotes e aplique todas as atualizações de segurança e melhorias do sistema base.
+```bash
+git clone https://github.com/arikcnovais/linuxmint-post-install.git
+cd linuxmint-post-install
+./setup.sh
+```
+
+O `setup.sh` abre um menu. Também dá para ir direto ao ponto:
+
+```bash
+./setup.sh --list              # ver as categorias
+./setup.sh all                 # rodar tudo, na ordem
+./setup.sh jogos               # rodar só uma categoria
+./setup.sh apt jogos artcraft  # rodar várias
+```
+
+Cada categoria também roda sozinha, o que facilita entender/auditar:
+
+```bash
+bash categories/10-artcraft.sh
+```
+
+> Não rode os scripts com `sudo`. Eles chamam `sudo` quando necessário.
+
+---
+
+## 📋 Categorias
+
+| # | Categoria | Script | O que faz |
+|---|---|---|---|
+| 1 | `sistema` | `01-sistema.sh` | `apt update` + `upgrade` e instala `mint-meta-codecs` |
+| 2 | `seguranca` | `02-seguranca.sh` | Ativa o **ufw** (opcionalmente libera Warpinator/KDE Connect) |
+| 3 | `flathub` | `03-flathub.sh` | Registra o remoto **Flathub** |
+| 4 | `comunicacao` | `04-flatpak-comunicacao.sh` | **Telegram** (cliente livre) |
+| 5 | `criacao` | `05-flatpak-criacao.sh` | **GIMP**, **Inkscape**, **OBS Studio**, **Kdenlive** |
+| 6 | `midia` | `06-flatpak-midia.sh` | **FreeTube** |
+| 7 | `jogos` | `07-flatpak-jogos.sh` | **Prism Launcher** e **RetroArch** |
+| 8 | `utilitarios` | `08-flatpak-utilitarios.sh` | **Flatseal** e **Gear Lever** |
+| 9 | `apt` | `09-apt-ferramentas.sh` | **git, htop, p7zip-full, unrar, build-essential, neovim, gamemode** |
+| 10 | `artcraft` | `10-artcraft.sh` | Baixa o **ArtCraft Launcher (AppImage)** e integra pelo **Gear Lever** |
+| 11 | `limpeza` | `11-limpeza.sh` | `apt autoremove`/`autoclean` e `flatpak uninstall --unused` |
+
+---
+
+## 🔧 O que mudou em relação à versão anterior
+
+**Navegadores — removidos por completo.** O Firefox nativo do Mint já cobre a
+navegação. Saíram **Chrome**, **Edge** e **Zen**: os dois primeiros são
+proprietários e o terceiro só duplicava função.
+
+**Removido por serem proprietários ou dependerem de serviços fechados:**
+
+- **Vesktop / Discord** — cliente de um serviço proprietário.
+- **Spotube** — cliente ligado a serviços de streaming.
+- **Lutris** — launcher pensado para lojas/clientes proprietários (Steam, Epic, Battle.net).
+
+**Removido por já existir no Mint (redundância):**
+
+- **Firefox** e **Thunderbird** — já vêm como pacotes nativos.
+- **`curl` e `wget`** — já presentes no sistema base.
+
+**Removido por estar obsoleto/bloat:**
+
+- **`neofetch`** — abandonado há anos.
+
+**Adicionado:**
+
+- **`neovim`** e **`gamemode`** via apt (categoria `apt`).
+- **Gear Lever** (`it.mijorus.gearlever`) para gerenciar/integrar AppImages.
+- **ArtCraft Launcher** como AppImage, baixado do release oficial e integrado ao menu pelo Gear Lever (categoria `artcraft`).
+
+**Mantido de propósito (mesmo não sendo livre):**
+
+- **`mint-meta-codecs`** e **`unrar`** — necessários na prática para reprodução de
+  mídia e extração de RAR. Decisão consciente de manter o sistema funcional.
+
+> ℹ️ **Sobre o ArtCraft:** é um projeto novo, em desenvolvimento ativo e de
+> licença “source-available”. O launcher é baixado direto das releases oficiais
+> em `github.com/storytold/craft-launcher`, sempre com verificação de SHA-256.
+> Avalie os aplicativos individualmente antes de adotá-los como substitutos do LibreOffice.
+
+---
+
+## 1. Atualização do sistema e codecs
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-```
-
-Para garantir a reprodução de formatos proprietários de áudio e vídeo (caso não tenha marcado a opção durante a instalação):
-
-```bash
 sudo apt install mint-meta-codecs -y
 ```
 
----
-
-## 2. Configuração do Firewall e Segurança
-
-Mantenha seu sistema protegido ativando o Firewall padrão (`ufw`).
+## 2. Firewall e segurança
 
 ```bash
 sudo apt install ufw -y
 sudo ufw enable
 ```
 
-> **Nota para usuários do Warpinator / KDE Connect / Local Sharing:**  
-> Caso utilize o Warpinator ou aplicativos de transferência local via rede, adicione as regras apropriadas:
+> **Warpinator / KDE Connect / compartilhamento local:** libere as portas 1714:1764.
+> No script: `LOCAL_SHARE=1 bash categories/02-seguranca.sh`
+>
 > ```bash
 > sudo ufw allow 1714:1764/udp
 > sudo ufw allow 1714:1764/tcp
 > ```
 
----
-
-## 3. Configuração do Flathub
-
-O Linux Mint 22.3 já vem com suporte nativo ao Flatpak ativado por padrão. Para garantir que o repositório Flathub principal esteja corretamente vinculado e atualizado, execute:
+## 3. Flathub
 
 ```bash
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 ```
 
----
+## 4. Aplicativos Flatpak (por categoria)
 
-## 4. Instalação de Aplicativos Flatpak (por Categoria)
-
-Os comandos abaixo estão divididos em grupos funcionais. Você pode rodar a categoria inteira ou escolher individualmente o software desejado.
-
-### 🌐 Navegadores Web
-*(Nota: O Firefox já vem nativamente instalado e otimizado no Linux Mint via pacote de repositório, por isso foi omitido da lista Flatpak)*.
-
-```bash
-flatpak install flathub com.google.Chrome -y
-flatpak install flathub com.microsoft.Edge -y
-flatpak install flathub app.zen_browser.zen -y
-```
-
-### 💬 Comunicação e Produtividade
-Ferramentas essenciais para conversas, e-mails e gerenciamento de tarefas.
+### 💬 Comunicação
 
 ```bash
 flatpak install flathub org.telegram.desktop -y
-flatpak install flathub dev.vencord.Vesktop -y
-flatpak install flathub org.mozilla.Thunderbird -y
 ```
 
-### 🎨 Criação e Edição Gráfica/Vídeo
-Suíte para design vetorial, manipulação de imagens, gravação de tela e edição de vídeos.
+### 🎨 Criação e edição gráfica/vídeo
 
 ```bash
 flatpak install flathub org.gimp.GIMP -y
@@ -108,71 +157,82 @@ flatpak install flathub com.obsproject.Studio -y
 flatpak install flathub org.kde.kdenlive -y
 ```
 
-### 🎵 Mídia e Entretenimento
-Clientes alternativos e leves para reprodução de áudio e vídeo sem rastreamento ou anúncios intrusivos.
+### 🎵 Mídia e entretenimento
 
 ```bash
-flatpak install flathub com.github.KRTirtho.Spotube -y
 flatpak install flathub io.freetubeapp.FreeTube -y
 ```
 
-### 🎮 Jogos e Emulação
-Central completa para jogos nativos, launchers alternativos de Minecraft e suporte a emulação clássica.
+### 🎮 Jogos e emulação
 
 ```bash
-flatpak install flathub net.lutris.Lutris -y
 flatpak install flathub org.prismlauncher.PrismLauncher -y
 flatpak install flathub org.libretro.RetroArch -y
 ```
 
-### 🛠️ Gerenciamento e Utilitários
-Ferramenta para gerenciamento granulado de permissões de privacidade dos aplicativos em sandbox.
+### 🛠️ Gerenciamento e utilitários
 
 ```bash
-flatpak install flathub com.github.tchx84.Flatseal -y
+flatpak install flathub com.github.tchx84.Flatseal -y   # permissões de sandbox
+flatpak install flathub it.mijorus.gearlever -y          # gestão de AppImages
 ```
 
----
-
-## 5. Instalação de Aplicativos e Pacotes via APT
-
-Para ferramentas de linha de comando, manutenção e compressores de arquivos do sistema:
+## 5. Aplicativos e pacotes via APT
 
 ```bash
 sudo apt install -y \
   git \
-  curl \
-  wget \
   htop \
-  neofetch \
   p7zip-full \
   unrar \
-  build-essential
+  build-essential \
+  neovim \
+  gamemode
 ```
 
----
+## 6. ArtCraft Launcher (AppImage) + Gear Lever
 
-## 6. Otimização e Ajustes Finos
+O script `categories/10-artcraft.sh` faz tudo:
 
-### Gerenciando permissões com o Flatseal
-Acessos a pastas secundárias, HDs externos e partições de dados (como discos formatados em NTFS/ext4) para o **Lutris**, **Prism Launcher** ou **OBS Studio** podem ser liberados facilmente usando o **Flatseal**:
+1. descobre a release mais recente do launcher (`storytold/craft-launcher`) para a sua arquitetura;
+2. baixa o AppImage para `~/Applications/ArtCraft-Launcher.AppImage`;
+3. confere o **SHA-256** publicado na release;
+4. integra no menu de aplicativos com `flatpak run it.mijorus.gearlever --integrate <arquivo>`.
+
+Manualmente, a integração fica assim:
+
+```bash
+flatpak run it.mijorus.gearlever --integrate ~/Applications/ArtCraft-Launcher.AppImage
+```
+
+## 7. Otimização e ajustes finos
+
+### Permissões com o Flatseal
+
+Acessos a HDs externos e partições (NTFS/ext4) para apps em sandbox como o
+**OBS Studio** e o **Prism Launcher** podem ser liberados no **Flatseal**:
+
 1. Abra o **Flatseal**.
-2. Selecione o aplicativo na barra lateral (ex: Lutris).
-3. Na seção **Filesystem** (Sistema de Arquivos), habilite `All system files` ou adicione o caminho do seu disco secundário em `Other files`.
+2. Selecione o aplicativo na barra lateral.
+3. Em **Filesystem**, habilite `All system files` ou adicione o caminho em `Other files`.
 
-### Limpeza de pacotes residuais
-Para remover dependências não utilizadas após a instalação completa:
+### GameMode
+
+O `gamemode` é instalado via apt e é usado automaticamente por jogos que o
+suportam. Em launchers manuais, inicie com `gamemoderun`.
+
+### Limpeza de residuais
 
 ```bash
 sudo apt autoremove -y
+sudo apt autoclean
 flatpak uninstall --unused -y
 ```
 
----
+## 8. Considerações finais
 
-## 7. Considerações Finais
-
-Após concluir o roteiro, **reinicie o sistema** para garantir que todas as variáveis de ambiente, atalhos do menu do Cinnamon/XFCE/MATE e serviços em segundo plano sejam carregados corretamente:
+**Reinicie** para que variáveis de ambiente, entradas de menu e serviços
+carreguem corretamente:
 
 ```bash
 sudo reboot
@@ -180,4 +240,5 @@ sudo reboot
 
 ---
 
-*Baseado no projeto original [debian-post-install](https://github.com/eddiecsilva/debian-post-install) de Eddie Silva, adaptado e otimizado para a distribuição Linux Mint 22.3.*
+*Baseado no projeto original [debian-post-install](https://github.com/eddiecsilva/debian-post-install)
+de Eddie Silva, adaptado e otimizado para o Linux Mint 22.3.*
